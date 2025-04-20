@@ -46,6 +46,28 @@
       margin: 20px;
       color: #333;
     }
+    #progress-list {
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    
+    #brain-icon {
+      width: 64px;
+      height: 64px;
+      margin-top: 20px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .grow {
+      transform: scale(1.5);
+    }
+
+    #milestone-message {
+      font-size: 20px;
+      margin-top: 10px;
+    }
   </style>
 
   <script>
@@ -53,24 +75,7 @@
       navigator.serviceWorker.register('service-worker.js')
         .then(() => console.log('Service Worker Registered'));
     }
-  </script>
-</head>
-<body>
-  <h1>Memorization Counter</h1>
-  <div id="counter">0</div>
 
-  <button onclick="incrementCounter()">Increment</button>
-  <button onclick="resetCounter()">Reset</button>
-
-  <h2>Focus Timer (Pomodoro)</h2>
-  <div id="timer">25:00</div>
-  <div>
-    <button onclick="startTimer()">Start</button>
-    <button onclick="pauseTimer()">Pause</button>
-    <button onclick="resetTimer()">Reset</button>
-  </div>
-
-  <script>
     let counter = 0;
 
     function calculateColor(value) {
@@ -86,11 +91,13 @@
     function updateDisplay() {
       document.getElementById('counter').textContent = counter;
       document.body.style.backgroundColor = calculateColor(counter);
+      updateMilestoneMessage();
     }
 
     function incrementCounter() {
       counter++;
       updateDisplay();
+      saveDailyProgress();
     }
 
     function resetCounter() {
@@ -98,7 +105,61 @@
       updateDisplay();
     }
 
+    function getTodayKey() {
+      const today = new Date();
+      return today.toISOString().split('T')[0]; // e.g. "2025-04-20"
+    }
+
+    function saveDailyProgress() {
+      const key = 'dailyProgress';
+      const today = getTodayKey();
+      let progress = JSON.parse(localStorage.getItem(key)) || {};
+      progress[today] = (progress[today] || 0) + 1;
+      localStorage.setItem(key, JSON.stringify(progress));
+      updateProgressList();
+    }
+
+    function updateProgressList() {
+      const progressList = document.getElementById('progress-list');
+      const key = 'dailyProgress';
+      let progress = JSON.parse(localStorage.getItem(key)) || {};
+
+      let html = '';
+      for (let date in progress) {
+        html += `<li><strong>${date}</strong>: ${progress[date]} times</li>`;
+      }
+      progressList.innerHTML = html;
+    }
+
+    function updateMilestoneMessage() {
+      const messageEl = document.getElementById('milestone-message');
+      const brainIcon = document.getElementById('brain-icon');
+      if (counter >= 60) {
+        messageEl.textContent = "🌟 MashaAllah! You've hit a major milestone!";
+        brainIcon.classList.add('grow');
+      } else if (counter >= 55) {
+        messageEl.textContent = "💪 Keep going, you're almost there!";
+        brainIcon.classList.add('grow');
+      } else if (counter >= 44) {
+        messageEl.textContent = "🌟 You're doing amazing!";
+        brainIcon.classList.add('grow');
+      } else if (counter >= 33) {
+        messageEl.textContent = "🚀 Almost halfway there!";
+        brainIcon.classList.add('grow');
+      } else if (counter >= 22) {
+        messageEl.textContent = "💪 Great focus!";
+        brainIcon.classList.add('grow');
+      } else if (counter >= 11) {
+        messageEl.textContent = "🚀 You're on your way!";
+        brainIcon.classList.add('grow');
+      } else {
+        messageEl.textContent = "";
+        brainIcon.classList.remove('grow');
+      }
+    }
+
     updateDisplay();
+    updateProgressList();
 
     // Pomodoro Timer
     let timerDuration = 25 * 60;
@@ -141,5 +202,27 @@
 
     updateTimerDisplay();
   </script>
+</head>
+<body>
+  <h1>Memorization Counter</h1>
+  <div id="counter">0</div>
+
+  <button onclick="incrementCounter()">Increment</button>
+  <button onclick="resetCounter()">Reset</button>
+
+  <h2>Focus Timer (Pomodoro)</h2>
+  <div id="timer">25:00</div>
+  <div>
+    <button onclick="startTimer()">Start</button>
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="resetTimer()">Reset</button>
+  </div>
+
+  <!-- Growing Brain Icon -->
+  <img id="brain-icon" src="brain.png" alt="Brain Icon">
+
+  <!-- Daily Progress Log -->
+  <h3>📅 Daily Progress</h3>
+  <ul id="progress-list" style="text-align: left; max-height: 200px; overflow-y: auto;"></ul>
 </body>
 </html>
