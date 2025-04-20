@@ -7,12 +7,12 @@
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "hifdh.png",  // Updated to use your new icon file
+      "src": "https://github.com/yutomata/memorization-counter/raw/main/hifdh.png",  // Full URL to the icon
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "hifdh.png",  // Updated to use your new icon file
+      "src": "https://github.com/yutomata/memorization-counter/raw/main/hifdh.png",  // Full URL to the icon
       "sizes": "512x512",
       "type": "image/png"
     }
