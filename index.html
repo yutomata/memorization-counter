@@ -1,223 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Memorization Counter</title>
+    <meta charset="UTF-8">
+    <!-- 🔒 Prevents zooming on iPhone -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Memorization Counter</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            height: 100vh;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
 
-  <!-- Favicon for browser tabs -->
-  <link rel="icon" type="image/png" href="hifdh.png">
+        h1 {
+            font-size: 36px;
+        }
 
-  <!-- Home screen icon for iOS -->
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        #counter {
+            font-size: 50px;
+            margin-top: 20px;
+        }
 
-  <!-- PWA manifest -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            touch-action: manipulation; /* ✅ Prevents zoom on iOS */
+        }
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-      height: 100vh;
-      background-color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-    }
-
-    h1 {
-      font-size: 36px;
-    }
-
-    #counter {
-      font-size: 50px;
-      margin-top: 20px;
-    }
-
-    /* Blue button style */
-    button {
-      font-size: 18px;
-      padding: 15px 30px;
-      margin-top: 20px;
-      margin-right: 10px;
-      cursor: pointer;
-      background-color: #007bff; /* Blue color */
-      color: white;
-      border: none;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #0056b3; /* Darker blue on hover */
-    }
-
-    #timer {
-      font-size: 40px;
-      margin: 20px;
-      color: #333;
-    }
-
-    /* Avoid zooming on buttons and inputs */
-    body, button, input {
-      -webkit-text-size-adjust: 100%; /* Prevent scaling of text */
-      -webkit-appearance: none; /* Remove mobile browser specific styling */
-    }
-
-    button:focus {
-      outline: none;
-    }
-  </style>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('Service Worker Registered'));
-    }
-
-    let counter = 0;
-
-    function calculateColor(value) {
-      if (value >= 11 && value <= 21) return '#d3817d';
-      else if (value >= 22 && value <= 32) return '#f97e06';
-      else if (value >= 33 && value <= 43) return '#e3d55b';
-      else if (value >= 44 && value <= 54) return '#acdca2';
-      else if (value >= 55 && value <= 59) return '#51a540';
-      else if (value >= 60) return '#c2a649';
-      else return 'white';
-    }
-
-    function updateDisplay() {
-      document.getElementById('counter').textContent = counter;
-      document.body.style.backgroundColor = calculateColor(counter);
-      updateMilestoneMessage();
-    }
-
-    function incrementCounter() {
-      counter++;
-      updateDisplay();
-      saveDailyProgress();
-    }
-
-    function resetCounter() {
-      counter = 0;
-      updateDisplay();
-    }
-
-    function getTodayKey() {
-      const today = new Date();
-      return today.toISOString().split('T')[0]; // e.g. "2025-04-20"
-    }
-
-    function saveDailyProgress() {
-      const key = 'dailyProgress';
-      const today = getTodayKey();
-      let progress = JSON.parse(localStorage.getItem(key)) || {};
-      progress[today] = (progress[today] || 0) + 1;
-      localStorage.setItem(key, JSON.stringify(progress));
-      updateProgressList();
-    }
-
-    function updateProgressList() {
-      const progressList = document.getElementById('progress-list');
-      const key = 'dailyProgress';
-      let progress = JSON.parse(localStorage.getItem(key)) || {};
-
-      let html = '';
-      for (let date in progress) {
-        html += `<li><strong>${date}</strong>: ${progress[date]} times</li>`;
-      }
-      progressList.innerHTML = html;
-    }
-
-    function updateMilestoneMessage() {
-      const messageEl = document.getElementById('milestone-message');
-      if (counter >= 60) {
-        messageEl.textContent = "🌟 MashaAllah! You've hit a major milestone!";
-      } else if (counter >= 55) {
-        messageEl.textContent = "💪 Keep going, you're almost there!";
-      } else if (counter >= 44) {
-        messageEl.textContent = "🌟 You're doing amazing!";
-      } else if (counter >= 33) {
-        messageEl.textContent = "🚀 Almost halfway there!";
-      } else if (counter >= 22) {
-        messageEl.textContent = "💪 Great focus!";
-      } else if (counter >= 11) {
-        messageEl.textContent = "🚀 You're on your way!";
-      } else {
-        messageEl.textContent = "";
-      }
-    }
-
-    updateDisplay();
-    updateProgressList();
-
-    // Pomodoro Timer
-    let timerDuration = 25 * 60;
-    let timer = timerDuration;
-    let interval = null;
-    let isRunning = false;
-
-    function updateTimerDisplay() {
-      const minutes = String(Math.floor(timer / 60)).padStart(2, '0');
-      const seconds = String(timer % 60).padStart(2, '0');
-      document.getElementById('timer').textContent = `${minutes}:${seconds}`;
-    }
-
-    function startTimer() {
-      if (!isRunning) {
-        isRunning = true;
-        interval = setInterval(() => {
-          if (timer > 0) {
-            timer--;
-            updateTimerDisplay();
-          } else {
-            clearInterval(interval);
-            isRunning = false;
-            alert("Time's up! Take a short break and review what you've memorized.");
-          }
-        }, 1000);
-      }
-    }
-
-    function pauseTimer() {
-      clearInterval(interval);
-      isRunning = false;
-    }
-
-    function resetTimer() {
-      pauseTimer();
-      timer = timerDuration;
-      updateTimerDisplay();
-    }
-
-    updateTimerDisplay();
-  </script>
+        #timer {
+            font-size: 40px;
+            margin: 20px;
+            color: #333;
+        }
+    </style>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(() => console.log('Service Worker Registered'));
+        }
+    </script>
 </head>
 <body>
-  <h1>Memorization Counter</h1>
-  <div id="counter">0</div>
+    <h1>Memorization Counter</h1>
+    <div id="counter">0</div>
 
-  <button onclick="incrementCounter()">Increment</button>
-  <button onclick="resetCounter()">Reset</button>
+    <button onclick="incrementCounter()">Increment</button>
+    <button onclick="resetCounter()">Reset</button>
 
-  <h2>Focus Timer (Pomodoro)</h2>
-  <div id="timer">25:00</div>
-  <div>
-    <button onclick="startTimer()">Start</button>
-    <button onclick="pauseTimer()">Pause</button>
-    <button onclick="resetTimer()">Reset</button>
-  </div>
+    <h2>Focus Timer (Pomodoro)</h2>
+    <div id="timer">25:00</div>
+    <div>
+        <button onclick="startTimer()">Start</button>
+        <button onclick="pauseTimer()">Pause</button>
+        <button onclick="resetTimer()">Reset</button>
+    </div>
 
-  <!-- Daily Progress Log -->
-  <h3>📅 Daily Progress</h3>
-  <ul id="progress-list" style="text-align: left; max-height: 200px; overflow-y: auto;"></ul>
+    <script>
+        let counter = 0;
 
-  <!-- Milestone Message -->
-  <div id="milestone-message"></div>
+        function calculateColor(value) {
+            if (value >= 11 && value <= 21) return '#d3817d';
+            else if (value >= 22 && value <= 32) return '#f97e06';
+            else if (value >= 33 && value <= 43) return '#e3d55b';
+            else if (value >= 44 && value <= 54) return '#acdca2';
+            else if (value >= 55 && value <= 59) return '#51a540';
+            else if (value >= 60) return '#c2a649';
+            else return 'white';
+        }
+
+        function updateDisplay() {
+            document.getElementById('counter').textContent = counter;
+            document.body.style.backgroundColor = calculateColor(counter);
+        }
+
+        function incrementCounter() {
+            counter++;
+            updateDisplay();
+        }
+
+        function resetCounter() {
+            counter = 0;
+            updateDisplay();
+        }
+
+        updateDisplay();
+
+        // Pomodoro Timer
+        let timerDuration = 25 * 60;
+        let timer = timerDuration;
+        let interval = null;
+        let isRunning = false;
+
+        function updateTimerDisplay() {
+            const minutes = String(Math.floor(timer / 60)).padStart(2, '0');
+            const seconds = String(timer % 60).padStart(2, '0');
+            document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                interval = setInterval(() => {
+                    if (timer > 0) {
+                        timer--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(interval);
+                        isRunning = false;
+                        alert("Time's up! Take a short break and review what you've memorized.");
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            clearInterval(interval);
+            isRunning = false;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timer = timerDuration;
+            updateTimerDisplay();
+        }
+
+        updateTimerDisplay();
+    </script>
 </body>
 </html>
