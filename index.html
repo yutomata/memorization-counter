@@ -1,141 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <!-- 🔒 Prevents zooming on iPhone -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Memorization Counter</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-            height: 100vh;
-            background-color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        h1 {
-            font-size: 36px;
-        }
-
-        #counter {
-            font-size: 50px;
-            margin-top: 20px;
-        }
-
-        button {
-            font-size: 20px;
-            padding: 10px 20px;
-            margin-top: 20px;
-            margin-right: 10px;
-            cursor: pointer;
-            touch-action: manipulation; /* ✅ Prevents zoom on iOS */
-        }
-
-        #timer {
-            font-size: 40px;
-            margin: 20px;
-            color: #333;
-        }
-    </style>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
-                .then(() => console.log('Service Worker Registered'));
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Memorization Counter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 20px;
+      background-color: white;
+    }
+    h1, h2 {
+      font-size: 24px;
+    }
+    #counter {
+      font-size: 48px;
+      margin-top: 10px;
+    }
+    #ayah-status {
+      font-size: 24px;
+      margin: 15px 0;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px 5px;
+      cursor: pointer;
+    }
+    input {
+      padding: 5px;
+      font-size: 18px;
+      width: 60px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <h1>Memorization Counter</h1>
-    <div id="counter">0</div>
+  <h1>Memorization Counter</h1>
 
-    <button onclick="incrementCounter()">Increment</button>
-    <button onclick="resetCounter()">Reset</button>
+  <div>
+    Ayah Range:
+    <input type="number" id="startAyah" placeholder="From" min="1">
+    to
+    <input type="number" id="endAyah" placeholder="To" min="1">
+    <button onclick="startSession()">Start</button>
+  </div>
 
-    <h2>Focus Timer (Pomodoro)</h2>
-    <div id="timer">25:00</div>
-    <div>
-        <button onclick="startTimer()">Start</button>
-        <button onclick="pauseTimer()">Pause</button>
-        <button onclick="resetTimer()">Reset</button>
-    </div>
+  <div id="ayah-status">Please select a range</div>
+  <div id="counter">0</div>
 
-    <script>
-        let counter = 0;
+  <button onclick="incrementCounter()">Increment</button>
+  <button onclick="resetSession()">Reset</button>
 
-        function calculateColor(value) {
-            if (value >= 11 && value <= 21) return '#d3817d';
-            else if (value >= 22 && value <= 32) return '#f97e06';
-            else if (value >= 33 && value <= 43) return '#e3d55b';
-            else if (value >= 44 && value <= 54) return '#acdca2';
-            else if (value >= 55 && value <= 59) return '#51a540';
-            else if (value >= 60) return '#c2a649';
-            else return 'white';
+  <script>
+    let startAyah = 1;
+    let endAyah = 1;
+    let currentAyah = 1;
+    let counter = 0;
+    let phase = 'individual'; // 'individual' or 'range'
+
+    function updateDisplay() {
+      document.getElementById('counter').textContent = counter;
+      if (phase === 'individual') {
+        document.getElementById('ayah-status').textContent = `Ayah ${currentAyah}`;
+      } else {
+        document.getElementById('ayah-status').textContent = `Ayah ${startAyah} to ${endAyah}`;
+      }
+    }
+
+    function startSession() {
+      startAyah = parseInt(document.getElementById('startAyah').value);
+      endAyah = parseInt(document.getElementById('endAyah').value);
+      if (isNaN(startAyah) || isNaN(endAyah) || startAyah > endAyah) {
+        alert("Please enter a valid ayah range.");
+        return;
+      }
+      currentAyah = startAyah;
+      counter = 0;
+      phase = 'individual';
+      updateDisplay();
+    }
+
+    function incrementCounter() {
+      counter++;
+      if (counter >= 33) {
+        counter = 0;
+        if (phase === 'individual') {
+          if (currentAyah < endAyah) {
+            currentAyah++;
+          } else {
+            phase = 'range';
+          }
+        } else if (phase === 'range') {
+          alert("You've completed 33 repetitions of the full range!");
+          return;
         }
+      }
+      updateDisplay();
+    }
 
-        function updateDisplay() {
-            document.getElementById('counter').textContent = counter;
-            document.body.style.backgroundColor = calculateColor(counter);
-        }
+    function resetSession() {
+      counter = 0;
+      currentAyah = startAyah;
+      phase = 'individual';
+      updateDisplay();
+    }
 
-        function incrementCounter() {
-            counter++;
-            updateDisplay();
-        }
-
-        function resetCounter() {
-            counter = 0;
-            updateDisplay();
-        }
-
-        updateDisplay();
-
-        // Pomodoro Timer
-        let timerDuration = 25 * 60;
-        let timer = timerDuration;
-        let interval = null;
-        let isRunning = false;
-
-        function updateTimerDisplay() {
-            const minutes = String(Math.floor(timer / 60)).padStart(2, '0');
-            const seconds = String(timer % 60).padStart(2, '0');
-            document.getElementById('timer').textContent = `${minutes}:${seconds}`;
-        }
-
-        function startTimer() {
-            if (!isRunning) {
-                isRunning = true;
-                interval = setInterval(() => {
-                    if (timer > 0) {
-                        timer--;
-                        updateTimerDisplay();
-                    } else {
-                        clearInterval(interval);
-                        isRunning = false;
-                        alert("Time's up! Take a short break and review what you've memorized.");
-                    }
-                }, 1000);
-            }
-        }
-
-        function pauseTimer() {
-            clearInterval(interval);
-            isRunning = false;
-        }
-
-        function resetTimer() {
-            pauseTimer();
-            timer = timerDuration;
-            updateTimerDisplay();
-        }
-
-        updateTimerDisplay();
-    </script>
+    updateDisplay();
+  </script>
 </body>
 </html>
