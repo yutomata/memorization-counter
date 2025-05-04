@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Memorization Pomodoro + Ayah Tracker</title>
+  <title>Memorization Tracker</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -127,9 +127,8 @@
     function incrementCounter() {
       counter++;
 
-      // Change color every 11 repetitions
       if (counter % 11 === 0 && counter !== 0) {
-        document.body.style.backgroundColor = getRandomColor();
+        changeBackgroundColor();
       }
 
       if (counter >= 33) {
@@ -144,6 +143,7 @@
           alert("You've completed 33 repetitions of the full range!");
         }
       }
+
       updateDisplay();
     }
 
@@ -154,9 +154,18 @@
       updateDisplay();
     }
 
-    function getRandomColor() {
-      const colors = ["#f4cccc", "#d9ead3", "#cfe2f3", "#fff2cc", "#e6b8af", "#b4a7d6"];
-      return colors[Math.floor(Math.random() * colors.length)];
+    function changeBackgroundColor() {
+      const colors = [
+        "#e3f2fd", // light blue
+        "#fce4ec", // pink
+        "#f3e5f5", // lavender
+        "#e8f5e9", // light green
+        "#fff3e0", // soft orange
+        "#ede7f6", // soft purple
+        "#fffde7"  // pale yellow
+      ];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      document.body.style.backgroundColor = color;
     }
 
     updateDisplay();
