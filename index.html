@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -127,6 +126,12 @@
 
     function incrementCounter() {
       counter++;
+
+      // Change color every 11 repetitions
+      if (counter % 11 === 0 && counter !== 0) {
+        document.body.style.backgroundColor = getRandomColor();
+      }
+
       if (counter >= 33) {
         counter = 0;
         if (phase === 'individual') {
@@ -147,6 +152,11 @@
       currentAyah = startAyah;
       phase = 'individual';
       updateDisplay();
+    }
+
+    function getRandomColor() {
+      const colors = ["#f4cccc", "#d9ead3", "#cfe2f3", "#fff2cc", "#e6b8af", "#b4a7d6"];
+      return colors[Math.floor(Math.random() * colors.length)];
     }
 
     updateDisplay();
