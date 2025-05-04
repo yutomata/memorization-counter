@@ -2,146 +2,108 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Memorization Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="hifdh.png"/>
+  <title>Hifdh Counter</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       text-align: center;
-      background-color: #ffffff !important;
-      transition: background-color 0.5s ease !important;
+      padding: 2rem;
+      background-color: white;
+      transition: background-color 0.5s ease;
     }
+
     h1 {
-      margin-top: 20px;
+      margin-bottom: 1rem;
     }
-    #timer, #counter, #ayah-status {
-      font-size: 36px;
-      margin: 20px;
+
+    .counter {
+      font-size: 5rem;
+      margin: 1rem 0;
     }
+
+    .ayah-range {
+      margin-top: 0.5rem;
+      font-size: 1.2rem;
+    }
+
     button {
-      font-size: 18px;
-      padding: 10px 20px;
-      margin: 5px;
+      font-size: 1.2rem;
+      padding: 0.75rem 1.5rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
     }
-    input {
-      padding: 5px;
-      font-size: 18px;
-      width: 60px;
-      text-align: center;
+
+    button:hover {
+      background-color: #555;
     }
   </style>
 </head>
 <body>
-  <h1>Memorization Tracker</h1>
+  <h1>Hifdh Repetition Counter</h1>
+  <div>
+    <label for="startAyah">Start Ayah: </label>
+    <input type="number" id="startAyah" value="1" min="1" />
+    <label for="endAyah">End Ayah: </label>
+    <input type="number" id="endAyah" value="10" min="1" />
+    <button onclick="startSession()">Start</button>
+  </div>
 
-  <!-- Pomodoro Timer -->
-  <div id="timer">25:00</div>
-  <button onclick="startPomodoro()">Start</button>
-  <button onclick="resetPomodoro()">Reset</button>
+  <div class="counter" id="counterDisplay">0</div>
+  <div class="ayah-range" id="ayahDisplay">Ayah: -</div>
 
-  <!-- Ayah Repetition Counter -->
-  <h2>Ayah Range:</h2>
-  <input type="number" id="startAyah" placeholder="From" min="1" />
-  to
-  <input type="number" id="endAyah" placeholder="To" min="1" />
-  <button onclick="startSession()">Start Ayah Tracker</button>
-
-  <div id="ayah-status">Select ayah range to begin</div>
-  <div id="counter">0</div>
-  <button onclick="incrementCounter()">Increment</button>
-  <button onclick="resetSession()">Reset Counter</button>
-  <br><br>
-  <button onclick="changeBackgroundColor()">Test Color</button> <!-- Manual color test -->
+  <div>
+    <button onclick="incrementCounter()">Repeat</button>
+    <button onclick="resetSession()">Reset</button>
+  </div>
 
   <script>
-    // Pomodoro logic
-    let pomodoroMinutes = 25;
-    let breakMinutes = 5;
-    let isRunning = false;
-    let isBreak = false;
-    let timeLeft = pomodoroMinutes * 60;
-    let pomodoroInterval;
-
-    function startPomodoro() {
-      if (!isRunning) {
-        isRunning = true;
-        pomodoroInterval = setInterval(updatePomodoro, 1000);
-      }
-    }
-
-    function resetPomodoro() {
-      clearInterval(pomodoroInterval);
-      isRunning = false;
-      isBreak = false;
-      timeLeft = pomodoroMinutes * 60;
-      updateTimerDisplay();
-      document.body.style.backgroundColor = "#ffffff";
-    }
-
-    function updatePomodoro() {
-      timeLeft--;
-      if (timeLeft <= 0) {
-        clearInterval(pomodoroInterval);
-        isBreak = !isBreak;
-        timeLeft = (isBreak ? breakMinutes : pomodoroMinutes) * 60;
-        document.body.style.backgroundColor = isBreak ? "#a8d5e2" : "#fdd9a0";
-        isRunning = false;
-        startPomodoro();
-      }
-      updateTimerDisplay();
-    }
-
-    function updateTimerDisplay() {
-      let minutes = Math.floor(timeLeft / 60);
-      let seconds = timeLeft % 60;
-      document.getElementById("timer").textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    }
-
-    // Ayah repetition logic
     let startAyah = 1;
-    let endAyah = 1;
+    let endAyah = 10;
     let currentAyah = 1;
     let counter = 0;
-    let phase = 'individual'; // or 'range'
+    let phase = 'individual';
 
-    function updateDisplay() {
-      document.getElementById("counter").textContent = counter;
-      if (phase === 'individual') {
-        document.getElementById("ayah-status").textContent = `Ayah ${currentAyah}`;
-      } else {
-        document.getElementById("ayah-status").textContent = `Ayah ${startAyah} to ${endAyah}`;
-      }
+    function calculateColor(value) {
+      if (value >= 11 && value <= 21) return '#d3817d';
+      else if (value >= 22 && value <= 32) return '#f97e06';
+      else if (value >= 33 && value <= 43) return '#e3d55b';
+      else if (value >= 44 && value <= 54) return '#acdca2';
+      else if (value >= 55 && value <= 59) return '#51a540';
+      else if (value >= 60) return '#c2a649';
+      else return 'white';
     }
 
-    function startSession() {
-      startAyah = parseInt(document.getElementById("startAyah").value);
-      endAyah = parseInt(document.getElementById("endAyah").value);
-      if (isNaN(startAyah) || isNaN(endAyah) || startAyah > endAyah) {
-        alert("Please enter a valid ayah range.");
-        return;
+    function updateDisplay() {
+      document.getElementById("counterDisplay").textContent = counter;
+      if (phase === 'individual') {
+        document.getElementById("ayahDisplay").textContent = `Ayah: ${currentAyah}`;
+      } else {
+        document.getElementById("ayahDisplay").textContent = `Ayah: ${startAyah} to ${endAyah}`;
       }
-      currentAyah = startAyah;
-      counter = 0;
-      phase = 'individual';
-      updateDisplay();
     }
 
     function incrementCounter() {
       counter++;
-      if (counter % 11 === 0 && counter !== 0) {
-        changeBackgroundColor();
-      }
+      document.body.style.backgroundColor = calculateColor(counter);
 
       if (counter >= 33) {
-        counter = 0;
         if (phase === 'individual') {
           if (currentAyah < endAyah) {
             currentAyah++;
+            counter = 0;
           } else {
             phase = 'range';
+            counter = 0;
           }
-        } else {
-          alert("You've completed 33 repetitions of the full range!");
+        } else if (phase === 'range') {
+          // stays on range
         }
       }
       updateDisplay();
@@ -151,26 +113,17 @@
       counter = 0;
       currentAyah = startAyah;
       phase = 'individual';
+      document.body.style.backgroundColor = "white";
       updateDisplay();
     }
 
-    function changeBackgroundColor() {
-      const colors = [
-        "#e3f2fd", // light blue
-        "#fce4ec", // pink
-        "#f3e5f5", // lavender
-        "#e8f5e9", // light green
-        "#fff3e0", // soft orange
-        "#ede7f6", // soft purple
-        "#fffde7"  // pale yellow
-      ];
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      console.log("Changing to color:", color);
-      document.body.style.backgroundColor = color;
+    function startSession() {
+      startAyah = parseInt(document.getElementById("startAyah").value, 10);
+      endAyah = parseInt(document.getElementById("endAyah").value, 10);
+      resetSession();
     }
 
-    updateDisplay();
-    updateTimerDisplay();
+    window.onload = updateDisplay;
   </script>
 </body>
 </html>
