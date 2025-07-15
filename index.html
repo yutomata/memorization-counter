@@ -49,7 +49,19 @@
             navigator.serviceWorker.register('service-worker.js')
                 .then(() => console.log('Service Worker Registered'));
         }
-    </script>
+    
+// Attempt to map physical volume buttons for increment and reset
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'AudioVolumeUp') {
+        incrementCounter();
+        event.preventDefault();
+    } else if (event.key === 'AudioVolumeDown') {
+        resetCounter();
+        event.preventDefault();
+    }
+});
+
+</script>
 </head>
 <body>
     <h1>Memorization Counter</h1>
@@ -136,6 +148,18 @@
         }
 
         updateTimerDisplay();
-    </script>
+    
+// Attempt to map physical volume buttons for increment and reset
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'AudioVolumeUp') {
+        incrementCounter();
+        event.preventDefault();
+    } else if (event.key === 'AudioVolumeDown') {
+        resetCounter();
+        event.preventDefault();
+    }
+});
+
+</script>
 </body>
 </html>
