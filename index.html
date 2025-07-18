@@ -76,10 +76,10 @@
                 logDiv.textContent = `Key log: key="${event.key}", code="${event.code}", keyCode=${event.keyCode}`;
             }
 
-            if (event.key === 'AudioVolumeUp' || event.key === 'F7') {
+            if (event.key === 'MediaPlayPause' || event.key === 'F7') {
                 incrementCounter();
                 event.preventDefault();
-            } else if (event.key === 'AudioVolumeDown' || event.key === 'F6') {
+            } else if (event.key === 'MediaTrackNext' || event.key === 'F6') {
                 resetCounter();
                 event.preventDefault();
             }
